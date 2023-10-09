@@ -92,7 +92,7 @@ class SupervisedDataset(Dataset):
             value = message["value"]
             value_ids = self.tokenizer.encode(value)
 
-            if from_ == "human":
+            if from_ == "user":
                 input_ids += self.q_tokens + value_ids + self.ret_token
                 labels += [self.ignore_index] * (len(self.q_tokens) + len(value_ids) + len(self.ret_token))
             else:
