@@ -141,6 +141,9 @@ def train():
         cache_dir=training_args.cache_dir,
     )
 
+    if tokenizer.pad_token_id == None:
+        tokenizer.pad_token_id = 0
+
     if training_args.use_lora:
         from peft import LoraConfig, TaskType, get_peft_model
 
