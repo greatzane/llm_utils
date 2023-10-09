@@ -26,6 +26,18 @@ class TrainingArguments(transformers.TrainingArguments):
     cache_dir: Optional[str] = field(default=None)
     optim: str = field(default="adamw_torch")
     model_max_length: int = field(default=1024)
+    logging_steps: int = field(default=10)
+    save_steps: int = field(default=1000)
+    save_total_limit: int = field(default=1)
+    per_device_train_batch_size: int = field(default=4)
+    gradient_accumulation_steps: int = field(default=8)
+    num_train_epochs: float = field(default=1.0)
+    learning_rate: float = field(default=2e-5)
+    weight_decay: float = field(default=0.01)
+    adam_beta2: float = field(default=0.96)
+    lr_scheduler_type: str = field(default="cosine")
+    bf16: float = field(default=True)
+    tf32: float = field(default=True)
     use_lora: bool = field(default=False)
     lora_target: str = field(default=None)
 
@@ -45,11 +57,13 @@ class SupervisedDataset(Dataset):
         self.model_max_length = model_max_length
         self.ignore_index = -100
         self.system_title = tokenizer('<<<system>>>\n').input_ids
-        self.system_title_len = len(self.system_title)
         self.conversations_title = tokenizer('\n\n<<<conversations>>>\n').input_ids
-        self.conversations_title_len = len(self.conversations_title)
+        self.q_tokens = tokenizer('<Q>:').input_ids
+        self.a_tokens = tokenizer('<A>:').input_ids
         self.ret_token = tokenizer('\n').input_ids
-        self.ret_token_len = len(self.ret_token)
+        self.pad_token_id = tokenizer.pad_token_id if tokenizer.pad_token_id != None else 0
+        self.bos_token_id = tokenizer.bos_token_id if tokenizer.bos_token_id != None else 0
+        self.eos_token_id = tokenizer.eos_token_id if tokenizer.eos_token_id != None else 0
 
         item = self.preprocessing(self.data[0])
         print("input:", self.tokenizer.decode(item["input_ids"]))
@@ -79,25 +93,25 @@ class SupervisedDataset(Dataset):
             value_ids = self.tokenizer.encode(value)
 
             if from_ == "human":
-                input_ids += value_ids + self.ret_token
-                labels += [self.ignore_index] * (len(value_ids) + self.ret_token_len)
+                input_ids += self.q_tokens + value_ids + self.ret_token
+                labels += [self.ignore_index] * (len(self.q_tokens) + len(value_ids) + len(self.ret_token))
             else:
-                input_ids += value_ids + self.ret_token
-                labels += value_ids + self.ret_token
+                input_ids += self.a_tokens + value_ids + self.ret_token
+                labels += self.a_tokens + value_ids + self.ret_token
 
-        input_ids.append(self.tokenizer.eos_token_id)
-        labels.append(self.tokenizer.eos_token_id)
-        input_ids = input_ids[: self.model_max_length]
-        labels = labels[: self.model_max_length]
+        input_ids.append(self.eos_token_id)
+        labels.append(self.eos_token_id)
+        input_ids = input_ids[:self.model_max_length]
+        labels = labels[:self.model_max_length]
 
-        input_ids += [self.tokenizer.pad_token_id] * (
+        input_ids += [self.pad_token_id] * (
             self.model_max_length - len(input_ids)
         )
         labels += [self.ignore_index] * (self.model_max_length - len(labels))
 
         input_ids = torch.LongTensor(input_ids)
         labels = torch.LongTensor(labels)
-        attention_mask = input_ids.ne(self.tokenizer.pad_token_id)
+        attention_mask = input_ids.ne(self.pad_token_id)
         return {
             "input_ids": input_ids,
             "labels": labels,
@@ -126,11 +140,6 @@ def train():
         model_max_length=training_args.model_max_length,
         cache_dir=training_args.cache_dir,
     )
-
-    tokenizer.pad_token_id = 0
-    tokenizer.bos_token_id = 1
-    tokenizer.eos_token_id = 2
-    #print(tokenizer.pad_token_id, tokenizer.bos_token_id, tokenizer.eos_token_id)
 
     if training_args.use_lora:
         from peft import LoraConfig, TaskType, get_peft_model
