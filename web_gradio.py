@@ -94,22 +94,16 @@ def main(
 
     def evaluate(
         instruction,
-        input=None,
-        temperature=0.1,
-        top_p=0.75,
-        top_k=40,
-        num_beams=4,
         max_new_tokens=128,
-        stream_output=False,
+        stream_output=True,
         **kwargs,
     ):
-        prompt = prompter.generate_prompt(instruction, input)
+        prompt = prompter.generate_prompt(instruction)
         inputs = tokenizer(prompt, return_tensors="pt")
         input_ids = inputs["input_ids"].to(device)
         generation_config = GenerationConfig.from_pretrained(
             base_model
         )
-        print("model eos", model.generation_config.eos_token_id)
         '''
         generation_config = GenerationConfig(
             temperature=temperature,
@@ -183,32 +177,18 @@ def main(
                 label="Instruction",
                 placeholder="Tell me about alpacas.",
             ),
-            gr.components.Textbox(lines=2, label="Input", placeholder="none"),
-            gr.components.Slider(
-                minimum=0, maximum=1, value=0.1, label="Temperature"
-            ),
-            gr.components.Slider(
-                minimum=0, maximum=1, value=0.75, label="Top p"
-            ),
-            gr.components.Slider(
-                minimum=0, maximum=100, step=1, value=40, label="Top k"
-            ),
-            gr.components.Slider(
-                minimum=1, maximum=4, step=1, value=4, label="Beams"
-            ),
             gr.components.Slider(
                 minimum=1, maximum=2000, step=1, value=128, label="Max tokens"
             ),
-            gr.components.Checkbox(label="Stream output"),
+            gr.components.Checkbox(label="Stream output", value=True),
         ],
         outputs=[
-            gr.inputs.Textbox(
+            gr.components.Textbox(
                 lines=5,
                 label="Output",
             )
         ],
-        title="🦙🌲 Alpaca-LoRA",
-        description="Alpaca-LoRA is a 7B-parameter LLaMA model finetuned to follow instructions. It is trained on the [Stanford Alpaca](https://github.com/tatsu-lab/stanford_alpaca) dataset and makes use of the Huggingface LLaMA implementation. For more information, please visit [the project's website](https://github.com/tloen/alpaca-lora).",  # noqa: E501
+        title="🦙🌲 LLM utils",
     ).queue().launch(server_name="0.0.0.0", share=share_gradio)
     # Old testing code follows.
 
