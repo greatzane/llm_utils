@@ -4,5 +4,5 @@ accelerate
 deepspeed
 streamlit
 fire
-gradio==3.44.4
+gradio
 peft

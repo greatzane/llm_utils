@@ -101,8 +101,9 @@ class SupervisedDataset(Dataset):
                 input_ids += self.a_tokens + value_ids + self.ret_token
                 labels += self.a_tokens + value_ids + self.ret_token
 
-        input_ids.append(self.eos_token_id)
-        labels.append(self.eos_token_id)
+            input_ids.append(self.eos_token_id)
+            labels.append(self.eos_token_id)
+
         input_ids = input_ids[:self.model_max_length]
         labels = labels[:self.model_max_length]
 
