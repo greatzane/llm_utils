@@ -60,12 +60,13 @@ class SupervisedDataset(Dataset):
         self.ignore_index = -100
         self.system_title = tokenizer('<<<system>>>\n').input_ids
         self.conversations_title = tokenizer('\n\n<<<conversations>>>\n').input_ids
-        self.q_tokens = tokenizer('<Q>:').input_ids
-        self.a_tokens = tokenizer('<A>:').input_ids
-        self.ret_token = tokenizer('\n').input_ids
+        self.q_tokens = tokenizer.encode('<Q>:', add_special_tokens=False)
+        self.a_tokens = tokenizer.encode('<A>:', add_special_tokens=False)
+        self.ret_token = tokenizer.encode('\n', add_special_tokens=False)
         self.pad_token_id = tokenizer.pad_token_id if tokenizer.pad_token_id != None else 0
         self.bos_token_id = tokenizer.bos_token_id if tokenizer.bos_token_id != None else 0
         self.eos_token_id = tokenizer.eos_token_id if tokenizer.eos_token_id != None else 0
+        print(self.q_tokens, self.a_tokens, self.ret_token)
 
         item = self.preprocessing(self.data[0])
         print("input:", self.tokenizer.decode(item["input_ids"]))
@@ -85,16 +86,16 @@ class SupervisedDataset(Dataset):
         labels = []
 
         if "system" in example:
-            system_ids = self.tokenizer.encode(example["system"])
+            system_ids = self.tokenizer.encode(example["system"], add_special_tokens=False)
             input_ids += self.system_title + system_ids + self.conversations_title
             labels += [self.ignore_index] * (len(self.system_title) + len(system_ids) + len(self.conversations_title))
 
         for message in example["conversations"]:
             from_ = message["from"]
             value = message["value"]
-            value_ids = self.tokenizer.encode(value)
+            value_ids = self.tokenizer.encode(value, add_special_tokens=False)
 
-            if from_ == "human":
+            if from_ == "user":
                 input_ids += self.q_tokens + value_ids + self.ret_token
                 labels += [self.ignore_index] * (len(self.q_tokens) + len(value_ids) + len(self.ret_token))
             else:
