@@ -96,14 +96,11 @@ class SupervisedDataset(Dataset):
             value_ids = self.tokenizer.encode(value, add_special_tokens=False)
 
             if from_ == "user":
-                input_ids += self.q_tokens + value_ids + self.ret_token
-                labels += [self.ignore_index] * (len(self.q_tokens) + len(value_ids) + len(self.ret_token))
+                input_ids += self.q_tokens + value_ids + self.ret_token + [self.eos_token_id]
+                labels += [self.ignore_index] * (len(self.q_tokens) + len(value_ids) + len(self.ret_token) + 1)
             else:
-                input_ids += self.a_tokens + value_ids + self.ret_token
-                labels += self.a_tokens + value_ids + self.ret_token
-
-            input_ids.append(self.eos_token_id)
-            labels.append(self.eos_token_id)
+                input_ids += self.a_tokens + value_ids + self.ret_token + [self.eos_token_id]
+                labels += self.a_tokens + value_ids + self.ret_token + [self.eos_token_id]
 
         input_ids = input_ids[:self.model_max_length]
         labels = labels[:self.model_max_length]
