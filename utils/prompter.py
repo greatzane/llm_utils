@@ -52,3 +52,56 @@ class Prompter(object):
             return output.split(self.template["response_split"])[1].strip()
         else:
             return output
+
+class Finetune_Prompter(object):
+    def __init__(self, template_name: str = "", verbose: bool = False):
+        self._verbose = verbose
+        if not template_name:
+            # Enforce the default here, so the constructor can be called with '' and will not break.
+            template_name = "default"
+        file_name = osp.join("templates", f"finetune_{template_name}.json")
+        if not osp.exists(file_name):
+            raise ValueError(f"Can't read {file_name}")
+        with open(file_name) as fp:
+            self.template = json.load(fp)
+        if self._verbose:
+            print(
+                f"Using finetune prompt template finetune_{template_name}"
+            )
+
+    def generate_prompt(
+        self,
+        type,
+        input,
+        q_tokens, 
+        a_tokens, 
+        qe_tokens, 
+        ae_tokens, 
+        ret_tokens, 
+        pad_token_id, 
+        bos_token_id, 
+        eos_token_id
+    ) -> []:
+
+        ret = []
+        for item in self.template[type]:
+            if item == "input" and input and len(input):
+                ret += input
+            elif item == "q_tokens" and q_tokens and len(q_tokens):
+                ret += q_tokens
+            elif item == "a_tokens" and a_tokens and len(a_tokens):
+                ret += a_tokens
+            elif item == "qe_tokens" and qe_tokens and len(qe_tokens):
+                ret += qe_tokens
+            elif item == "ae_tokens" and ae_tokens and len(ae_tokens):
+                ret += ae_tokens
+            elif item == "ret_tokens" and ret_tokens and len(ret_tokens):
+                ret += ret_tokens
+            elif item == "pad_token" and pad_token_id and len(pad_token_id):
+                ret += [pad_token_id]
+            elif item == "bos_token" and bos_token_id and len(bos_token_id):
+                ret += [bos_token_id]
+            elif item == "eos_token" and eos_token_id and len(eos_token_id):
+                ret += [eos_token_id]
+        
+        return ret

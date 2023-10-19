@@ -1,0 +1,16 @@
+{
+    "user_input": [
+        "q_tokens",
+        "input", 
+        "qe_tokens", 
+        "eos_token", 
+        "ret_tokens"
+    ],
+    "bot_input": [
+        "a_tokens",
+        "input", 
+        "ae_tokens", 
+        "eos_token", 
+        "ret_tokens"
+    ]
+}
