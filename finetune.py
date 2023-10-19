@@ -64,7 +64,8 @@ class SupervisedDataset(Dataset):
         q_str, 
         a_str, 
         qe_str, 
-        ae_str
+        ae_str, 
+        **kwargs
     ):
         super(SupervisedDataset, self).__init__()
         self.data = json.load(open(data_path))
