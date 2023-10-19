@@ -69,10 +69,14 @@ class Finetune_Prompter(object):
                 f"Using finetune prompt template finetune_{template_name}"
             )
 
+    def get_parameter(self, key):
+        if key in self.template:
+            return self.template[key]
+
     def generate_prompt(
         self,
-        type,
-        input,
+        key,
+        input_ids,
         q_tokens, 
         a_tokens, 
         qe_tokens, 
@@ -84,9 +88,9 @@ class Finetune_Prompter(object):
     ) -> []:
 
         ret = []
-        for item in self.template[type]:
-            if item == "input" and input and len(input):
-                ret += input
+        for item in self.template[key]:
+            if item == "input" and input_ids and len(input_ids):
+                ret += input_ids
             elif item == "q_tokens" and q_tokens and len(q_tokens):
                 ret += q_tokens
             elif item == "a_tokens" and a_tokens and len(a_tokens):
@@ -97,11 +101,11 @@ class Finetune_Prompter(object):
                 ret += ae_tokens
             elif item == "ret_tokens" and ret_tokens and len(ret_tokens):
                 ret += ret_tokens
-            elif item == "pad_token" and pad_token_id and len(pad_token_id):
+            elif item == "pad_token":
                 ret += [pad_token_id]
-            elif item == "bos_token" and bos_token_id and len(bos_token_id):
+            elif item == "bos_token":
                 ret += [bos_token_id]
-            elif item == "eos_token" and eos_token_id and len(eos_token_id):
+            elif item == "eos_token":
                 ret += [eos_token_id]
         
         return ret

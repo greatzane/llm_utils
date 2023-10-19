@@ -1,19 +1,15 @@
 {
-    "q_str": "<Q>", 
-    "qe_str": "</Q>", 
-    "a_str": "<A>", 
-    "ae_str": "</A>", 
+    "q_tokens": [195], 
+    "a_tokens": [196], 
     "user_input": [
         "q_tokens",
         "input", 
-        "qe_tokens", 
         "eos_token", 
         "ret_tokens"
     ],
     "bot_input": [
         "a_tokens",
         "input", 
-        "ae_tokens", 
         "eos_token", 
         "ret_tokens"
     ]

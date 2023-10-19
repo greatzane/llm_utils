@@ -61,10 +61,6 @@ class SupervisedDataset(Dataset):
         model_max_length,
         conversation_user, 
         prompt_template, 
-        q_str, 
-        a_str, 
-        qe_str, 
-        ae_str, 
         **kwargs
     ):
         super(SupervisedDataset, self).__init__()
@@ -74,10 +70,18 @@ class SupervisedDataset(Dataset):
         self.conversation_user = conversation_user
         self.prompter = Finetune_Prompter(prompt_template)
         self.ignore_index = -100
-        self.q_tokens = tokenizer.encode(q_str, add_special_tokens=False) if q_str and len(q_str) else None
-        self.a_tokens = tokenizer.encode(a_str, add_special_tokens=False) if a_str and len(a_str) else None
-        self.qe_tokens = tokenizer.encode(qe_str, add_special_tokens=False) if qe_str and len(qe_str) else None
-        self.ae_tokens = tokenizer.encode(ae_str, add_special_tokens=False) if ae_str and len(ae_str) else None
+        q_tokens = self.prompter.get_parameter("q_tokens")
+        a_tokens = self.prompter.get_parameter("a_tokens")
+        qe_tokens = self.prompter.get_parameter("qe_tokens")
+        ae_tokens = self.prompter.get_parameter("ae_tokens")
+        q_str = self.prompter.get_parameter("q_str")
+        a_str = self.prompter.get_parameter("a_str")
+        qe_str = self.prompter.get_parameter("qe_str")
+        ae_str = self.prompter.get_parameter("ae_str")
+        self.q_tokens = tokenizer.encode(q_str, add_special_tokens=False) if q_str and len(q_str) else q_tokens
+        self.a_tokens = tokenizer.encode(a_str, add_special_tokens=False) if a_str and len(a_str) else a_tokens
+        self.qe_tokens = tokenizer.encode(qe_str, add_special_tokens=False) if qe_str and len(qe_str) else qe_tokens
+        self.ae_tokens = tokenizer.encode(ae_str, add_special_tokens=False) if ae_str and len(ae_str) else ae_tokens
         self.ret_tokens = tokenizer.encode('\n', add_special_tokens=False)
         self.pad_token_id = tokenizer.pad_token_id if tokenizer.pad_token_id != None else 0
         self.bos_token_id = tokenizer.bos_token_id if tokenizer.bos_token_id != None else 0
@@ -168,7 +172,7 @@ def train():
 
         peft_config = LoraConfig(
             task_type=TaskType.CAUSAL_LM,
-            target_modules=training_args.lora_target,
+            target_modules=training_args.lora_target.split(","),
             inference_mode=False,
             r=8,
             lora_alpha=32,
