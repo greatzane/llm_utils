@@ -1,0 +1,18 @@
+{
+    "q_str": "<|im_start|>user\n", 
+    "qe_str": "<|im_end|>", 
+    "a_str": "<|im_start|>assistant\n", 
+    "ae_str": "<|im_end|>", 
+    "user_input": [
+        "q_tokens",
+        "input", 
+        "qe_tokens", 
+        "ret_tokens"
+    ],
+    "bot_input": [
+        "a_tokens",
+        "input", 
+        "ae_tokens", 
+        "ret_tokens"
+    ]
+}

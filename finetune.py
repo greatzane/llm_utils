@@ -39,16 +39,16 @@ class TrainingArguments(transformers.TrainingArguments):
     weight_decay: float = field(default=0.01)
     adam_beta2: float = field(default=0.96)
     lr_scheduler_type: str = field(default="cosine")
-    bf16: float = field(default=True)
-    tf32: float = field(default=True)
+    bf16: bool = field(default=True)
+    tf32: bool = field(default=True)
+    load_in_8bit: bool = field(default=False)
     use_lora: bool = field(default=False)
     lora_target: str = field(default=None)
     conversation_user: str = field(default="user")
     prompt_template: str = field(default="default")
-    q_str: str = field(default="<Q>")
-    a_str: str = field(default="<A>")
-    qe_str: str = field(default="</Q>")
-    ae_str: str = field(default="</A>")
+    pad_token: str = field(default=None)
+    bos_token: str = field(default=None)
+    eos_token: str = field(default=None)
 
 
 class SupervisedDataset(Dataset):
@@ -155,6 +155,7 @@ def train():
         model_args.model_name_or_path,
         trust_remote_code=True,
         cache_dir=training_args.cache_dir,
+        load_in_8bit=training_args.load_in_8bit, 
     )
     tokenizer = transformers.AutoTokenizer.from_pretrained(
         model_args.model_name_or_path,
@@ -162,6 +163,9 @@ def train():
         trust_remote_code=True,
         model_max_length=training_args.model_max_length,
         cache_dir=training_args.cache_dir,
+        pad_token=training_args.pad_token,
+        bos_token=training_args.bos_token,
+        eos_token=training_args.eos_token,
     )
 
     if tokenizer.pad_token_id == None:
