@@ -1,0 +1,5 @@
+{
+    "description": "Template used by InternLM.",
+    "prompt": "<|User|>:{instruction}<eoh>\n<|Bot|>:",
+    "response_split": "<|Bot|>:"
+}

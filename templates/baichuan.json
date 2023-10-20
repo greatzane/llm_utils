@@ -1,6 +1,5 @@
 {
     "description": "Template Baichuan",
-    "prompt_input": "<reserved_102>{instruction}\n{input}<reserved_103>",
-    "prompt_no_input": "<reserved_102>{instruction}<reserved_103>",
+    "prompt": "<reserved_102>{instruction}<reserved_103>",
     "response_split": "<reserved_103>"    
 }

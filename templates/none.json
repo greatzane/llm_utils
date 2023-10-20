@@ -1,6 +1,5 @@
 {
     "description": "Template None",
-    "prompt_input": "{instruction}{input}",
-    "prompt_no_input": "{instruction}",
+    "prompt": "{instruction}",
     "response_split": ""    
 }
