@@ -7,7 +7,6 @@
         "q_tokens",
         "input", 
         "qe_tokens", 
-        "eos_token", 
         "ret_tokens"
     ],
     "bot_input": [

@@ -4,7 +4,6 @@
     "user_input": [
         "q_tokens",
         "input", 
-        "eos_token", 
         "ret_tokens"
     ],
     "bot_input": [

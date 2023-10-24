@@ -156,6 +156,7 @@ def train():
         trust_remote_code=True,
         cache_dir=training_args.cache_dir,
         load_in_8bit=training_args.load_in_8bit, 
+        device_map="auto",
     )
     tokenizer = transformers.AutoTokenizer.from_pretrained(
         model_args.model_name_or_path,
@@ -172,7 +173,8 @@ def train():
         tokenizer.pad_token_id = 0
 
     if training_args.use_lora:
-        from peft import LoraConfig, TaskType, get_peft_model
+        from peft import LoraConfig, TaskType, get_peft_model, prepare_model_for_kbit_training
+        model = prepare_model_for_kbit_training(model)
 
         peft_config = LoraConfig(
             task_type=TaskType.CAUSAL_LM,

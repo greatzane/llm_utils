@@ -1,18 +1,14 @@
 {
-    "q_str": "<|User|>:", 
-    "qe_str": "<eoh>", 
-    "a_str": "<|Bot|>:", 
-    "ae_str": "<eoa>", 
+    "q_str": "### Instruction:\n", 
+    "a_str": "### Response:\n", 
     "user_input": [
         "q_tokens",
         "input", 
-        "qe_tokens", 
         "ret_tokens"
     ],
     "bot_input": [
         "a_tokens",
         "input", 
-        "ae_tokens", 
         "eos_token", 
         "ret_tokens"
     ]
