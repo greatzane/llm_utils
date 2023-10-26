@@ -3,12 +3,12 @@
     "a_str": "### Response:\n", 
     "user_input": [
         "q_tokens",
-        "input", 
+        "input_tokens", 
         "ret_tokens"
     ],
     "bot_input": [
         "a_tokens",
-        "input", 
+        "input_tokens", 
         "eos_token", 
         "ret_tokens"
     ]

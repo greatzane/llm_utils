@@ -1,0 +1,5 @@
+{
+    "description": "Template used by ChatGLM.",
+    "prompt": "问：{instruction}\n\n答：",
+    "response_split": "答："
+}

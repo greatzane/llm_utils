@@ -74,14 +74,14 @@ class SupervisedDataset(Dataset):
         a_tokens = self.prompter.get_parameter("a_tokens")
         qe_tokens = self.prompter.get_parameter("qe_tokens")
         ae_tokens = self.prompter.get_parameter("ae_tokens")
-        q_str = self.prompter.get_parameter("q_str")
-        a_str = self.prompter.get_parameter("a_str")
-        qe_str = self.prompter.get_parameter("qe_str")
-        ae_str = self.prompter.get_parameter("ae_str")
-        self.q_tokens = tokenizer.encode(q_str, add_special_tokens=False) if q_str and len(q_str) else q_tokens
-        self.a_tokens = tokenizer.encode(a_str, add_special_tokens=False) if a_str and len(a_str) else a_tokens
-        self.qe_tokens = tokenizer.encode(qe_str, add_special_tokens=False) if qe_str and len(qe_str) else qe_tokens
-        self.ae_tokens = tokenizer.encode(ae_str, add_special_tokens=False) if ae_str and len(ae_str) else ae_tokens
+        self.q_str = self.prompter.get_parameter("q_str")
+        self.a_str = self.prompter.get_parameter("a_str")
+        self.qe_str = self.prompter.get_parameter("qe_str")
+        self.ae_str = self.prompter.get_parameter("ae_str")
+        self.q_tokens = tokenizer.encode(self.q_str, add_special_tokens=False) if self.q_str and len(self.q_str) else q_tokens
+        self.a_tokens = tokenizer.encode(self.a_str, add_special_tokens=False) if self.a_str and len(self.a_str) else a_tokens
+        self.qe_tokens = tokenizer.encode(self.qe_str, add_special_tokens=False) if self.qe_str and len(self.qe_str) else qe_tokens
+        self.ae_tokens = tokenizer.encode(self.ae_str, add_special_tokens=False) if self.ae_str and len(self.ae_str) else ae_tokens
         self.ret_tokens = tokenizer.encode('\n', add_special_tokens=False)
         self.pad_token_id = tokenizer.pad_token_id if tokenizer.pad_token_id != None else 0
         self.bos_token_id = tokenizer.bos_token_id if tokenizer.bos_token_id != None else 0
@@ -111,14 +111,17 @@ class SupervisedDataset(Dataset):
             value = message["value"]
             value_ids = self.tokenizer.encode(value, add_special_tokens=False)
 
+            def tokenize(string):
+                return self.tokenizer.encode(string, add_special_tokens=False)
+
             if from_ == self.conversation_user:
-                new_ids = self.prompter.generate_prompt("user_input", value_ids, self.q_tokens, self.a_tokens, self.qe_tokens, self.ae_tokens, self.ret_tokens, self.pad_token_id, self.bos_token_id, self.eos_token_id)
+                new_ids = self.prompter.generate_prompt("user_input", value, value_ids, self.q_str, self.a_str, self.qe_str, self.ae_str, self.q_tokens, self.a_tokens, self.qe_tokens, self.ae_tokens, self.ret_tokens, self.pad_token_id, self.bos_token_id, self.eos_token_id, tokenize)
                 input_ids += new_ids
                 labels += [self.ignore_index] * len(new_ids)
                 #input_ids += self.q_tokens + value_ids + self.ret_tokens + [self.eos_token_id]
                 #labels += [self.ignore_index] * (len(self.q_tokens) + len(value_ids) + len(self.ret_tokens) + 1)
             else:
-                new_ids = self.prompter.generate_prompt("bot_input", value_ids, self.q_tokens, self.a_tokens, self.qe_tokens, self.ae_tokens, self.ret_tokens, self.pad_token_id, self.bos_token_id, self.eos_token_id)
+                new_ids = self.prompter.generate_prompt("bot_input", value, value_ids, self.q_str, self.a_str, self.qe_str, self.ae_str, self.q_tokens, self.a_tokens, self.qe_tokens, self.ae_tokens, self.ret_tokens, self.pad_token_id, self.bos_token_id, self.eos_token_id, tokenize)
                 input_ids += new_ids
                 labels += new_ids
                 #input_ids += self.a_tokens + value_ids + self.ret_tokens + [self.eos_token_id]
@@ -135,6 +138,7 @@ class SupervisedDataset(Dataset):
         input_ids = torch.LongTensor(input_ids)
         labels = torch.LongTensor(labels)
         attention_mask = input_ids.ne(self.pad_token_id)
+        attention_mask = [int(b) for b in attention_mask]
         return {
             "input_ids": input_ids,
             "labels": labels,
@@ -175,6 +179,16 @@ def train():
     if training_args.use_lora:
         from peft import LoraConfig, TaskType, get_peft_model, prepare_model_for_kbit_training
         model = prepare_model_for_kbit_training(model)
+
+        linear_module_names = set()
+        for name, module in model.named_modules():
+            mtype = type(module).__name__
+            if "Linear" in mtype:
+                names = name.split('.')
+                linear_module_names.add(names[-1] + ":" + mtype)
+
+        for name in linear_module_names:
+            print(name)
 
         peft_config = LoraConfig(
             task_type=TaskType.CAUSAL_LM,

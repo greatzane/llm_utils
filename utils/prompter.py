@@ -70,7 +70,12 @@ class Finetune_Prompter(object):
     def generate_prompt(
         self,
         key,
+        input_str, 
         input_ids,
+        q_str, 
+        a_str, 
+        qe_str, 
+        ae_str, 
         q_tokens, 
         a_tokens, 
         qe_tokens, 
@@ -78,12 +83,30 @@ class Finetune_Prompter(object):
         ret_tokens, 
         pad_token_id, 
         bos_token_id, 
-        eos_token_id
+        eos_token_id, 
+        process_string, 
     ) -> []:
 
         ret = []
+        temp_str = ""
         for item in self.template[key]:
-            if item == "input" and input_ids and len(input_ids):
+            if not item.endswith("_str") and len(temp_str):
+                ret += process_string(temp_str)
+                temp_str = ""
+
+            if item == "input_str" and input_str and len(input_str):
+                temp_str += input_str
+            elif item == "q_str" and q_str and len(q_str):
+                temp_str += q_str
+            elif item == "a_str" and a_str and len(a_str):
+                temp_str += a_str
+            elif item == "qe_str" and qe_str and len(qe_str):
+                temp_str += qe_str
+            elif item == "ae_str" and ae_str and len(ae_str):
+                temp_str += ae_str
+            elif item == "ret_str":
+                temp_str += "\n"
+            elif item == "input_tokens" and input_ids and len(input_ids):
                 ret += input_ids
             elif item == "q_tokens" and q_tokens and len(q_tokens):
                 ret += q_tokens
@@ -102,4 +125,7 @@ class Finetune_Prompter(object):
             elif item == "eos_token":
                 ret += [eos_token_id]
         
+        if len(temp_str):
+            ret += process_string(temp_str)
+
         return ret

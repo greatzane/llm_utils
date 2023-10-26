@@ -5,13 +5,13 @@
     "ae_str": "<|im_end|>", 
     "user_input": [
         "q_tokens",
-        "input", 
+        "input_tokens", 
         "qe_tokens", 
         "ret_tokens"
     ],
     "bot_input": [
         "a_tokens",
-        "input", 
+        "input_tokens", 
         "ae_tokens", 
         "ret_tokens"
     ]
