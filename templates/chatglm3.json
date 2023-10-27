@@ -1,0 +1,5 @@
+{
+    "description": "Template used by ChatGLM3.",
+    "prompt": "<|user|>\n{instruction}\n<|asssistant|>\n",
+    "response_split": "<|asssistant|>\n"
+}
