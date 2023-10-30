@@ -46,6 +46,7 @@ class TrainingArguments(transformers.TrainingArguments):
     lora_target: str = field(default=None)
     conversation_user: str = field(default="user")
     prompt_template: str = field(default="default")
+    partial_modules: str = field(default=None)
     pad_token: str = field(default=None)
     bos_token: str = field(default=None)
     eos_token: str = field(default=None)
@@ -160,7 +161,7 @@ def train():
         trust_remote_code=True,
         cache_dir=training_args.cache_dir,
         load_in_8bit=training_args.load_in_8bit, 
-        device_map="auto",
+        #device_map="auto",
     )
     tokenizer = transformers.AutoTokenizer.from_pretrained(
         model_args.model_name_or_path,
@@ -172,6 +173,20 @@ def train():
         bos_token=training_args.bos_token,
         eos_token=training_args.eos_token,
     )
+
+    train_module = training_args.partial_modules.split(",")
+    if train_module:
+        print("=======Partial modules=======")
+        num_params = 0
+        all_params = 0
+        for name, param in model.named_parameters():
+            all_params += param.numel()
+            if not any(mn in name for mn in train_module):
+                param.requires_grad = False
+            else:
+                num_params += param.numel()
+                print(name)
+        print("=============================> Total params {}, train params {}, {} %".format(all_params, num_params, 100 * num_params / all_params))
 
     if tokenizer.pad_token_id == None:
         tokenizer.pad_token_id = 0

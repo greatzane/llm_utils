@@ -30,6 +30,9 @@ def main(
     prompt_template: str = "",  # The prompt template to use, will default to alpaca.
     server_name: str = "0.0.0.0",  # Allows to listen on all interfaces by providing '0.
     share_gradio: bool = True,
+    pad_token: str = None,
+    bos_token: str = None, 
+    eos_token: str = None,
 ):
     base_model = base_model or os.environ.get("BASE_MODEL", "")
     assert (
@@ -37,7 +40,13 @@ def main(
     ), "Please specify a --base_model, e.g. --base_model='huggyllama/llama-7b'"
 
     prompter = Prompter(prompt_template)
-    tokenizer = AutoTokenizer.from_pretrained(base_model, trust_remote_code=True)
+    tokenizer = AutoTokenizer.from_pretrained(
+        base_model, 
+        trust_remote_code=True,
+        pad_token=pad_token,
+        bos_token=bos_token,
+        eos_token=eos_token,
+    )
     if device == "cuda":
         model = AutoModelForCausalLM.from_pretrained(
             base_model,
