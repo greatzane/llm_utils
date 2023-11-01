@@ -46,7 +46,7 @@ class TrainingArguments(transformers.TrainingArguments):
     lora_target: str = field(default=None)
     conversation_user: str = field(default="user")
     prompt_template: str = field(default="default")
-    partial_modules: str = field(default=None)
+    partial_modules: str = field(default="")
     pad_token: str = field(default=None)
     bos_token: str = field(default=None)
     eos_token: str = field(default=None)
@@ -186,7 +186,7 @@ def train():
             else:
                 num_params += param.numel()
                 print(name)
-        print("=============================> Total params {}, train params {}, {} %".format(all_params, num_params, 100 * num_params / all_params))
+        print("=============================> Total params {}, train params {}, {} %".format(all_params, num_params, 100 * num_params / all_params if all_params > 0 else 0))
 
     if tokenizer.pad_token_id == None:
         tokenizer.pad_token_id = 0
