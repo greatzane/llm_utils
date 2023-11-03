@@ -81,6 +81,9 @@ class Finetune_Prompter(object):
         qe_tokens, 
         ae_tokens, 
         ret_tokens, 
+        pad_str,
+        bos_str,
+        eos_str,
         pad_token_id, 
         bos_token_id, 
         eos_token_id, 
@@ -106,6 +109,12 @@ class Finetune_Prompter(object):
                 temp_str += ae_str
             elif item == "ret_str":
                 temp_str += "\n"
+            elif item == "pad_str":
+                temp_str += pad_str
+            elif item == "bos_str":
+                temp_str += bos_str
+            elif item == "eos_str":
+                temp_str += eos_str
             elif item == "input_tokens" and input_ids and len(input_ids):
                 ret += input_ids
             elif item == "q_tokens" and q_tokens and len(q_tokens):

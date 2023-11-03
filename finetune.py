@@ -84,10 +84,14 @@ class SupervisedDataset(Dataset):
         self.qe_tokens = tokenizer.encode(self.qe_str, add_special_tokens=False) if self.qe_str and len(self.qe_str) else qe_tokens
         self.ae_tokens = tokenizer.encode(self.ae_str, add_special_tokens=False) if self.ae_str and len(self.ae_str) else ae_tokens
         self.ret_tokens = tokenizer.encode('\n', add_special_tokens=False)
+        self.pad_token = tokenizer.pad_token if tokenizer.pad_token else ""
+        self.bos_token = tokenizer.bos_token if tokenizer.bos_token else ""
+        self.eos_token = tokenizer.eos_token if tokenizer.eos_token else ""
         self.pad_token_id = tokenizer.pad_token_id if tokenizer.pad_token_id != None else 0
         self.bos_token_id = tokenizer.bos_token_id if tokenizer.bos_token_id != None else 0
         self.eos_token_id = tokenizer.eos_token_id if tokenizer.eos_token_id != None else 0
         print("q_tokens", self.q_tokens, "a_tokens", self.a_tokens, "qe_tokens", self.qe_tokens, "ae_tokens", self.ae_tokens, "ret_tokens", self.ret_tokens)
+        print("pad_token", self.pad_token, "bos_token", self.bos_token, "eos_token", self.eos_token)
         print("pad_token_id", self.pad_token_id, "bos_token_id", self.bos_token_id, "eos_token_id", self.eos_token_id)
 
         item = self.preprocessing(self.data[0])
@@ -116,13 +120,15 @@ class SupervisedDataset(Dataset):
                 return self.tokenizer.encode(string, add_special_tokens=False)
 
             if from_ == self.conversation_user:
-                new_ids = self.prompter.generate_prompt("user_input", value, value_ids, self.q_str, self.a_str, self.qe_str, self.ae_str, self.q_tokens, self.a_tokens, self.qe_tokens, self.ae_tokens, self.ret_tokens, self.pad_token_id, self.bos_token_id, self.eos_token_id, tokenize)
+                new_ids = self.prompter.generate_prompt("user_input", value, value_ids, self.q_str, self.a_str, self.qe_str, self.ae_str, self.q_tokens, self.a_tokens, self.qe_tokens, self.ae_tokens, self.ret_tokens, 
+                        self.pad_token, self.bos_token, self.eos_token, self.pad_token_id, self.bos_token_id, self.eos_token_id, tokenize)
                 input_ids += new_ids
                 labels += [self.ignore_index] * len(new_ids)
                 #input_ids += self.q_tokens + value_ids + self.ret_tokens + [self.eos_token_id]
                 #labels += [self.ignore_index] * (len(self.q_tokens) + len(value_ids) + len(self.ret_tokens) + 1)
             else:
-                new_ids = self.prompter.generate_prompt("bot_input", value, value_ids, self.q_str, self.a_str, self.qe_str, self.ae_str, self.q_tokens, self.a_tokens, self.qe_tokens, self.ae_tokens, self.ret_tokens, self.pad_token_id, self.bos_token_id, self.eos_token_id, tokenize)
+                new_ids = self.prompter.generate_prompt("bot_input", value, value_ids, self.q_str, self.a_str, self.qe_str, self.ae_str, self.q_tokens, self.a_tokens, self.qe_tokens, self.ae_tokens, self.ret_tokens, 
+                        self.pad_token, self.bos_token, self.eos_token, self.pad_token_id, self.bos_token_id, self.eos_token_id, tokenize)
                 input_ids += new_ids
                 labels += new_ids
                 #input_ids += self.a_tokens + value_ids + self.ret_tokens + [self.eos_token_id]
