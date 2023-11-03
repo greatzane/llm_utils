@@ -46,7 +46,7 @@ class TrainingArguments(transformers.TrainingArguments):
     lora_target: str = field(default=None)
     conversation_user: str = field(default="user")
     prompt_template: str = field(default="default")
-    partial_modules: str = field(default="")
+    partial_modules: str = field(default=None)
     pad_token: str = field(default=None)
     bos_token: str = field(default=None)
     eos_token: str = field(default=None)
@@ -180,8 +180,8 @@ def train():
         eos_token=training_args.eos_token,
     )
 
-    train_module = training_args.partial_modules.split(",")
-    if train_module:
+    if training_args.partial_modules:
+        train_module = training_args.partial_modules.split(",")
         print("=======Partial modules=======")
         num_params = 0
         all_params = 0
