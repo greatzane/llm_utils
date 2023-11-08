@@ -1,0 +1,5 @@
+{
+    "description": "Template used by OpenBuddy.",
+    "prompt": "User: {instruction}\nAssistant: ",
+    "response_split": "Assistant: "
+}
