@@ -50,7 +50,8 @@ class BasicAuthMiddleware(BaseHTTPMiddleware):
 
 def _gc(forced: bool = False):
     global args
-    if args.disable_gc and not forced:
+    #if args.disable_gc and not forced:
+    if not forced:
         return
 
     import gc

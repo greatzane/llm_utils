@@ -203,7 +203,6 @@ def main(
     # Old testing code follows.
 
     if qwen_api and prompt_template == 'qwen':
-        print("=========")
         from qwen_openai_api import run_server
         run_server(tokenizer, model, "0.0.0.0", 8000)
 
