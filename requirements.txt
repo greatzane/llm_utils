@@ -7,3 +7,7 @@ fire
 gradio
 peft
 openpyxl
+fastapi
+uvicorn
+openai<1.0
+sse_starlette

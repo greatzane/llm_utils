@@ -33,6 +33,7 @@ def main(
     pad_token: str = None,
     bos_token: str = None, 
     eos_token: str = None,
+    qwen_api: bool = False, 
 ):
     base_model = base_model or os.environ.get("BASE_MODEL", "")
     assert (
@@ -198,8 +199,13 @@ def main(
             )
         ],
         title="🦙🌲 LLM utils",
-    ).queue().launch(server_name="0.0.0.0", share=share_gradio)
+    ).queue().launch(server_name="0.0.0.0", share=False, prevent_thread_lock=qwen_api)
     # Old testing code follows.
+
+    if qwen_api and prompt_template == 'qwen':
+        print("=========")
+        from qwen_openai_api import run_server
+        run_server(tokenizer, model, "0.0.0.0", 8000)
 
     """
     # testing code for readme

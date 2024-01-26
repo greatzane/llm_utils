@@ -563,6 +563,14 @@ def _get_args():
     args = parser.parse_args()
     return args
 
+model = None
+tokenizer = None
+def run_server(_tokenizer, _model, server_name, server_port):
+    global model, tokenizer
+    model = _model
+    tokenizer = _tokenizer
+    uvicorn.run(app, host=server_name, port=server_port, workers=1)
+
 
 if __name__ == '__main__':
     args = _get_args()
