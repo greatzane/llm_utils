@@ -1,0 +1,5 @@
+tiktoken
+transformers_stream_generator
+einops
+optimum
+auto-gptq
