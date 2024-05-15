@@ -45,11 +45,13 @@ class TrainingArguments(transformers.TrainingArguments):
     use_lora: bool = field(default=False)
     lora_target: str = field(default=None)
     conversation_user: str = field(default="user")
+    conversation_assistant: str = field(default="assistant")
     prompt_template: str = field(default="default")
     partial_modules: str = field(default=None)
     pad_token: str = field(default=None)
     bos_token: str = field(default=None)
     eos_token: str = field(default=None)
+    use_cpu: bool = field(default=False)
 
 
 class SupervisedDataset(Dataset):
@@ -61,6 +63,7 @@ class SupervisedDataset(Dataset):
         tokenizer,
         model_max_length,
         conversation_user, 
+        conversation_assistant,
         prompt_template, 
         **kwargs
     ):
@@ -69,6 +72,7 @@ class SupervisedDataset(Dataset):
         self.tokenizer = tokenizer
         self.model_max_length = model_max_length
         self.conversation_user = conversation_user
+        self.conversation_assistant = conversation_assistant
         self.prompter = Finetune_Prompter(prompt_template)
         self.ignore_index = -100
         q_tokens = self.prompter.get_parameter("q_tokens")
@@ -119,7 +123,7 @@ class SupervisedDataset(Dataset):
             def tokenize(string):
                 return self.tokenizer.encode(string, add_special_tokens=False)
 
-            if from_ == self.conversation_user:
+            if from_ != self.conversation_assistant:
                 new_ids = self.prompter.generate_prompt("user_input", value, value_ids, self.q_str, self.a_str, self.qe_str, self.ae_str, self.q_tokens, self.a_tokens, self.qe_tokens, self.ae_tokens, self.ret_tokens, 
                         self.pad_token, self.bos_token, self.eos_token, self.pad_token_id, self.bos_token_id, self.eos_token_id, tokenize)
                 input_ids += new_ids
@@ -167,7 +171,7 @@ def train():
         trust_remote_code=True,
         cache_dir=training_args.cache_dir,
         load_in_8bit=training_args.load_in_8bit, 
-        #device_map="auto",
+        device_map="cpu" if training_args.use_cpu else "auto",
     )
     tokenizer = transformers.AutoTokenizer.from_pretrained(
         model_args.model_name_or_path,
