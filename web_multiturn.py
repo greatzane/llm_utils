@@ -52,14 +52,19 @@ def _load_model_tokenizer(args):
     return model, tokenizer
 
 
-def _chat_stream(model, tokenizer, query, history):
+def _chat_stream(model, tokenizer, query, system, history):
+    sys = 'You are a helpful assistant.'
+    if len(system) > 0:
+        sys = system
+    
     conversation = [
-        {'role': 'system', 'content': 'You are a helpful assistant.'},
+        {'role': 'system', 'content': sys },
     ]
     for query_h, response_h in history:
         conversation.append({'role': 'user', 'content': query_h})
         conversation.append({'role': 'assistant', 'content': response_h})
     conversation.append({'role': 'user', 'content': query})
+    #print(conversation)
     inputs = tokenizer.apply_chat_template(
         conversation,
         add_generation_prompt=True,
@@ -87,12 +92,13 @@ def _gc():
 
 def _launch_demo(args, model, tokenizer):
 
-    def predict(_query, _chatbot, _task_history):
+    def predict(_query, _system, _chatbot, _task_history):
+        print(f"System: {_system}")
         print(f"User: {_query}")
         _chatbot.append((_query, ""))
         full_response = ""
         response = ""
-        for new_text in _chat_stream(model, tokenizer, _query, history=_task_history):
+        for new_text in _chat_stream(model, tokenizer, _query, _system, history=_task_history):
             response += new_text
             _chatbot[-1] = (_query, response)
 
@@ -103,13 +109,13 @@ def _launch_demo(args, model, tokenizer):
         _task_history.append((_query, full_response))
         print(f"Chatbot: {full_response}")
 
-    def regenerate(_chatbot, _task_history):
+    def regenerate(_system, _chatbot, _task_history):
         if not _task_history:
             yield _chatbot
             return
         item = _task_history.pop(-1)
         _chatbot.pop(-1)
-        yield from predict(item[0], _chatbot, _task_history)
+        yield from predict(item[0], _system, _chatbot, _task_history)
 
     def reset_user_input():
         return gr.update(value="")
@@ -123,8 +129,9 @@ def _launch_demo(args, model, tokenizer):
     with gr.Blocks() as demo:
         gr.Markdown("""<center><font size=8>LLMUtils Chatbot</center>""")
 
-        chatbot = gr.Chatbot(elem_classes="control-height", height=600)
-        query = gr.Textbox(lines=2, label='Input')
+        chatbot = gr.Chatbot(elem_classes="control-height", height=500)
+        system = gr.Textbox(lines=2, label='System')
+        query = gr.Textbox(lines=1, label='Input')
         task_history = gr.State([])
 
         with gr.Row():
@@ -132,10 +139,10 @@ def _launch_demo(args, model, tokenizer):
             submit_btn = gr.Button("🚀 Submit (发送)")
             regen_btn = gr.Button("🤔️ Regenerate (重试)")
 
-        submit_btn.click(predict, [query, chatbot, task_history], [chatbot], show_progress=True)
+        submit_btn.click(predict, [query, system, chatbot, task_history], [chatbot], show_progress=True)
         submit_btn.click(reset_user_input, [], [query])
         empty_btn.click(reset_state, [chatbot, task_history], outputs=[chatbot], show_progress=True)
-        regen_btn.click(regenerate, [chatbot, task_history], [chatbot], show_progress=True)
+        regen_btn.click(regenerate, [system, chatbot, task_history], [chatbot], show_progress=True)
 
     demo.queue().launch(
         server_port=args.server_port,
