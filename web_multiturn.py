@@ -32,7 +32,7 @@ def _get_args():
 
 def _load_model_tokenizer(args):
     tokenizer = AutoTokenizer.from_pretrained(
-        args.base_model, resume_download=True,
+        args.base_model, resume_download=True, trust_remote_code=True,
     )
 
     if args.cpu_only:
@@ -45,6 +45,7 @@ def _load_model_tokenizer(args):
         torch_dtype="auto",
         device_map=device_map,
         resume_download=True,
+        trust_remote_code=True,
     ).eval()
     model.generation_config.max_new_tokens = 2048   # For chat.
 
